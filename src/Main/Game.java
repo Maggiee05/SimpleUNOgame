@@ -64,8 +64,11 @@ public class Game {
      * The game starts based on this card
      */
     public void reset() {
-        deck.shuffleDeck();
         Card topCard = deck.getTopCard();
+        while (! (topCard instanceof NumberCard)) {
+            deck.shuffleDeck();
+            topCard = deck.getTopCard();
+        }
         discardPile_add(topCard);
         prevColor = topCard.getColor();
     }
