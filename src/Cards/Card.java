@@ -14,6 +14,7 @@ public abstract class Card {
         this.color = color;
     }
 
+
     public Colors getColor() {
         return this.color;
     }

@@ -4,7 +4,6 @@ import Cards.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Game {
     /**
@@ -179,6 +178,7 @@ public class Game {
      * Checking if a card is valid to play, current card is valid to play if:
      *      The current card matches either the color or the number or the symbol of the previous card
      *      Otherwise, Wild cards are always valid to play
+     * @return true if the card is valid to play, false otherwise
      */
     public boolean isValid(Card currCard) {
         Card prevCard = discardPile.get(discardPile.size() - 1); // getting the previous card
@@ -208,7 +208,7 @@ public class Game {
 
     /**
      * Changing the state of the player
-     * TODO: declaring color from the player
+     * @TODO: declaring color from the player
      */
     public void stateChange(Card card) {
         int iter = getPlayerIter();
@@ -240,6 +240,7 @@ public class Game {
     /**
      * Declaring the color by the player
      * Needed when playing WildCard or WildDrawFourCard
+     * @return the color declared by the player
      */
     public Card.Colors declareColor() {
         return colorDeclared;
@@ -308,6 +309,7 @@ public class Game {
 
     /**
      * Get the iterator for player
+     * @return the iterator of the next player
      */
     public int getPlayerIter() {
         int iter = player_iter + 1;

@@ -16,6 +16,7 @@ class GameTest {
     private Deck deck;
     private ArrayList<Player> players = new ArrayList<Player>();
     private Player player1, player1_;
+    private Player player2, player3;
 
     @BeforeEach
     public void setUp() {
@@ -112,4 +113,39 @@ class GameTest {
         assertTrue(test_player3.canPlay());
         assertTrue(test_player4.canPlay());
     }
+
+//    @Test
+//    public void testSplitDraw() {
+//        game = new Game();
+//        deck = new Deck(game);
+//        player1 = new Player("player1", game);
+//        player2 = new Player("player1", game);
+//        player3 = new Player("player1", game);
+//        players.add(player1);
+//        players.add(player2);
+//        players.add(player3);
+//        game.addPlayer(players);
+//        player1.assignCards(); //assign cards at the beginning of the game, only once needed
+//
+//        Card c1 = new NumberCard(Card.Colors.RED, 3);
+//        Card c2 = new DrawTwoCard(Card.Colors.RED);
+//        Card c3 = new SkipCard(Card.Colors.BLUE);
+//
+//        player1.getHand().add(c1);
+//        player2.getHand().add(c2);
+//        player3.getHand().add(c3);
+//
+//        game.playCard();
+//        game.playCard();
+//
+//        int it = game.getPlayerIter();
+//        System.out.println(it);
+//        System.out.println(players.get(0));
+//        System.out.println(players.get(1));
+//        System.out.println(players.get(2));
+//        System.out.println(players.get(it));
+//        System.out.println(player1.getHand().size());
+//        System.out.println(player2.getHand().size());
+//        System.out.println(player3.getHand().size());
+//    }
 }

@@ -68,6 +68,7 @@ public class Deck {
 
     /**
      * Get the top card of the draw pile
+     * @return the top card from the draw pile
      */
     public Card getTopCard() {
         Card topCard = deck.get(0);
@@ -89,7 +90,7 @@ public class Deck {
     }
 
     /**
-     * Return true if the draw pile is empty, false otherwise
+     * @return true if the draw pile is empty, false otherwise
      */
     public boolean isEmpty() {
         return (pileSize == 0);
@@ -104,7 +105,7 @@ public class Deck {
     }
 
     /**
-     * The size of the deck. Especially needed for test purpose
+     * @return the size of the deck
      */
     public int getDeckSize() {
         return deck.size();

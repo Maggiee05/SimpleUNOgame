@@ -26,7 +26,9 @@ public class Player {
     public boolean drawFour_;
 
     /**
-     * Construct a player
+     * Constructor for a player
+     * @param name of the player
+     * @param game that is ongoing
      */
     public Player(String name, Game game) {
         hand = new ArrayList<Card>();
@@ -56,7 +58,7 @@ public class Player {
 
     /**
      * Draw one Card from the deck
-     * @Return the card that was drew
+     * @return the card that was drew
      */
     public Card drawOneCard() {
         //If the draw pile is empty, update the deck
@@ -72,6 +74,7 @@ public class Player {
 
     /**
      * Play one card from the hand
+     * @param card that the player plays out
      */
     public void playOneCard(Card card) {
         hand.remove(card);
@@ -82,8 +85,7 @@ public class Player {
     }
 
     /**
-     * Return true if player has a valid card to play in hand,
-     *        false else.
+     * @return true if player has a valid card to play in hand, false otherwise.
      */
     public boolean canPlay() {
         for (Card cardInHand:hand) {
@@ -96,7 +98,7 @@ public class Player {
 
     /**
      * Find the valid card in hand
-     * @Return the card that is valid to play
+     * @return the card that is valid to play
      */
     public Card findValidCard() {
         Card card = null;
