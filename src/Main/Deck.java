@@ -77,6 +77,18 @@ public class Deck {
     }
 
     /**
+     * Shuffle deck for a number card on top
+     * For the purpose of picking number card when update the deck
+     */
+    public void checkTopNumberCard() {
+        Card topCard = deck.get(0);
+        while (!(topCard instanceof NumberCard)) {
+            shuffleDeck();
+            topCard = deck.get(0);
+        }
+    }
+
+    /**
      * Return true if the draw pile is empty, false otherwise
      */
     public boolean isEmpty() {

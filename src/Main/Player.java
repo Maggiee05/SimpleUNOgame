@@ -42,7 +42,7 @@ public class Player {
      * Assigning 7 cards to each player at the beginning of the game
      */
     public void assignCards() {
-        Player player;
+        Player player = this;
         for (int i = 0; i < game.getPlayerNum(); i++) {
             //System.out.println(player);
             for (int j = 0; j < 7; j++) {
@@ -78,6 +78,7 @@ public class Player {
         cardsInHand--;
         game.discardPile_add(card);
         game.setPrevColor(card.getColor());
+        game.setPrevPlayer(this); // this player becomes the preceding
     }
 
     /**

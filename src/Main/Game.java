@@ -24,6 +24,14 @@ public class Game {
      */
     private Player curPlayer;
     /**
+     * Previous player
+     */
+    private Player prevPlayer;
+    /**
+     * Direction, 0 for normal direction (small to big index), 1 for reversed
+     */
+    private int direction;
+    /**
      * Iterator of the player
      */
     private int player_iter;
@@ -44,6 +52,8 @@ public class Game {
      */
     private Player winner;
 
+    private boolean reverseOnB;
+
     /**
      * Construct a game with certain attributes initialized
      */
@@ -52,23 +62,23 @@ public class Game {
         discardPile = new ArrayList<Card>();
         players = new ArrayList<Player>();
         curPlayer = null;
+        prevPlayer = null;
+        direction = 0;
         player_iter = 0;
         colorDeclared = null;
         prevColor = null;
         gameOver = false;
         winner = null;
+        reverseOnB = false;
     }
 
     /**
      * Resetting the game, draw a card from the deck and place it in the discard pile
-     * The game starts based on this card
+     * This card should be a number card
      */
     public void reset() {
+        deck.checkTopNumberCard();
         Card topCard = deck.getTopCard();
-        while (! (topCard instanceof NumberCard)) {
-            deck.shuffleDeck();
-            topCard = deck.getTopCard();
-        }
         discardPile_add(topCard);
         prevColor = topCard.getColor();
     }
@@ -126,6 +136,9 @@ public class Game {
     public void playCard() {
         Card card = curPlayer.findValidCard();
         curPlayer.playOneCard(card);
+        if (card instanceof DrawTwoCard) {
+            splitDraw();
+        }
         stateChange(card); // update the game state
     }
 
@@ -139,6 +152,7 @@ public class Game {
         }
         if (curPlayer.drawTwo()) {
             drawAction(2);
+
         }
         if (curPlayer.drawFour()) {
             drawAction(4);
@@ -194,9 +208,12 @@ public class Game {
 
     /**
      * Changing the state of the player
+     * TODO: declaring color from the player
      */
     public void stateChange(Card card) {
-        Player nextPlayer = players.get(player_iter+1);
+        int iter = getPlayerIter();
+        Player nextPlayer = players.get(iter);
+        player_iter++;
         if (card instanceof SkipCard) {
             nextPlayer.setSkipped(true);
         } else if (card instanceof ReverseCard) {
@@ -205,9 +222,18 @@ public class Game {
             nextPlayer.setDrawTwo(true);
         } else if (card instanceof WildCard) {
             prevColor = declareColor();
+            if (reverseOnB) {
+                reverse();
+                player_iter -= 2;
+            }
         } else if (card instanceof WildDrawFourCard) {
-            nextPlayer.setDrawFour(true);
             prevColor = declareColor();
+            if (reverseOnB) {
+                reverse();
+                player_iter -= 2;
+                nextPlayer = players.get(iter-2);
+            }
+            nextPlayer.setDrawFour(true);
         }
     }
 
@@ -224,6 +250,10 @@ public class Game {
         prevColor = color;
     }
 
+    public void setPrevPlayer(Player p) {
+        prevPlayer = p;
+    }
+
     /**
      * Adding a card to the discard pile when a player plays the card
      */
@@ -236,7 +266,11 @@ public class Game {
      */
     public void reverse() {
         // Reverse the players Arraylist so that the next player become the previous, vice versa
-        Collections.reverse(players);
+        if (direction == 0) {
+            direction = 1;
+        } else {
+            direction = 0;
+        }
     }
 
     /**
@@ -271,6 +305,36 @@ public class Game {
             }
         }
     }
+
+    /**
+     * Get the iterator for player
+     */
+    public int getPlayerIter() {
+        int iter = player_iter + 1;
+        if (direction == 0) { // normal, small to big index
+            if (iter == getPlayerNum()) {
+                iter = 0;
+            }
+        } else { // reversed
+            iter = player_iter - 1;
+            if (iter < 0) {
+                iter = getPlayerNum() - 1;
+            }
+        }
+        return iter;
+    }
+
+    /**
+     * When a draw 2 card is played,
+     * the person immediately following and preceding the player draws 1 card
+     */
+    public void splitDraw() {
+        prevPlayer.drawOneCard(); // the person preceding the player draws one card
+        int iter = getPlayerIter();
+        Player nextPlayer = players.get(iter); // the person following the player draws one card
+        nextPlayer.drawOneCard();
+    }
+
 
     /*-----------------------------------------------------------------*/
     /* Getters */
