@@ -15,4 +15,8 @@ public class NumberCard extends Card{
         return this.cardNumber;
     }
 
+    public String getVal() {
+        return String.valueOf(this.cardNumber);
+    }
+
 }

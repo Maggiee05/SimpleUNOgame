@@ -1,6 +1,8 @@
 package Cards;
 
 public abstract class Card {
+    public abstract String getVal();
+
     public enum Colors {
         RED, YELLOW, GREEN, BLUE, WILD;
     }

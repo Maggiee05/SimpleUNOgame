@@ -7,4 +7,8 @@ public class DrawTwoCard extends Card{
     public DrawTwoCard(Colors color) {
         super(color);
     }
+
+    public String getVal() {
+        return "+2";
+    }
 }
