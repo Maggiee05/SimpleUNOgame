@@ -14,7 +14,6 @@ import java.util.Arrays;
 class DeckTest {
     private Game game;
     private Deck deck;
-    private Card temp_card;
 
     @BeforeEach
     public void setUp() {
@@ -46,9 +45,11 @@ class DeckTest {
      */
     @Test
     void testAddToDeck() {
+        Card temp_card = new NumberCard(Card.Colors.BLUE, 2);
         for (int i = 0; i < 10; i++) {
             deck.addToDeck(temp_card);
         }
         assertEquals(118, deck.getDeckSize());
     }
+
 }

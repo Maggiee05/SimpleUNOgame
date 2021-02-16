@@ -101,9 +101,9 @@ class PlayerTest {
 
         test_player1.playOneCard(test_player1.getHand().get(0)); // test_player1 now has YELLOW4
         //The discard pile should have BLUE2 on top
-        assertEquals(false, test_player1.canPlay());
-        assertEquals(true, test_player2.canPlay());
-        assertEquals(true, test_player3.canPlay());
-        assertEquals(true, test_player4.canPlay());
+        assertEquals(null, test_player1.findValidCard());
+        assertNotEquals(null, test_player2.findValidCard());
+        assertNotEquals(null, test_player3.findValidCard());
+        assertNotEquals(null, test_player4.findValidCard());
     }
 }

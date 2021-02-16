@@ -4,7 +4,12 @@ import Cards.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Random;
 
+/**
+ * The game class represents the game
+ * Implementing the game rules
+ */
 public class Game {
     /**
      * The deck where cards are generated
@@ -22,10 +27,6 @@ public class Game {
      * Current player
      */
     private Player curPlayer;
-    /**
-     * Previous player
-     */
-    private Player prevPlayer;
     /**
      * Direction, 0 for normal direction (small to big index), 1 for reversed
      */
@@ -50,8 +51,14 @@ public class Game {
      * The winner of the game
      */
     private Player winner;
-
+    /**
+     * True if the player wants to apply reverse on black rule
+     */
     private boolean reverseOnB;
+    /**
+     * Counter for the number of cards to be drawn
+     */
+    private int draw_num;
 
     /**
      * Construct a game with certain attributes initialized
@@ -61,14 +68,14 @@ public class Game {
         discardPile = new ArrayList<Card>();
         players = new ArrayList<Player>();
         curPlayer = null;
-        prevPlayer = null;
-        direction = 0;
+        direction = 0; //default normal direction, small to large index
         player_iter = 0;
         colorDeclared = null;
         prevColor = null;
         gameOver = false;
         winner = null;
-        reverseOnB = false;
+        reverseOnB = true;// default reverse on black is mandatory, can be changed
+        draw_num = 0;
     }
 
     /**
@@ -90,22 +97,22 @@ public class Game {
         //the first in the players array list is the current player
         curPlayer = players.get(0);
         player_iter = 0;
-        curPlayer.assignCards();
+        curPlayer.assignCards(); //only once
+        direction = 0;
+        draw_num = 0;
         reset();
     }
 
     /**
      * Adding players to the game
      */
-    public void addPlayer(ArrayList<Player> players) {
-        for (int i = 0; i < players.size(); i++) {
-            this.players.add(players.get(i));
-        }
+    public void addPlayer(ArrayList<Player> ps) {
+        this.players.addAll(ps);
     }
 
     /**
      * Options for player to perform:
-     * If the player misses a turn, apply the special action
+     * If the player has the special action, apply it
      * If the current player has valid card, play it
      * If the current player has no valid car, draw a card from the deck,
      *      if the card drew is valid, play it
@@ -113,19 +120,23 @@ public class Game {
      */
     public void perform() {
         player_iter++; // iterator turns to the next player
-        if (curPlayer.skipped() || curPlayer.drawTwo() || curPlayer.drawFour()) {
+        if (curPlayer.skipped()) {
             missTurn();
-        } else if (curPlayer.canPlay()) { // has a valid card
+        } else if (curPlayer.findValidCard() != null) { // has a valid card
             playCard();
-        } else  { // has no valid card, draw a card
+        } else { // has no valid card
+            if (curPlayer.drawTwo() || curPlayer.drawFour()) {
+                missTurn();
+                return;
+            }
             Card card = curPlayer.drawOneCard();
             if (isValid(card)) {
                 playCard(); // the card drew is valid, play it
             } else {
                 return; // the card drew is not valid, continue
             }
+
         }
-        return;
     }
 
     /**
@@ -135,8 +146,12 @@ public class Game {
     public void playCard() {
         Card card = curPlayer.findValidCard();
         curPlayer.playOneCard(card);
+        checkGameOver(curPlayer);
         if (card instanceof DrawTwoCard) {
+            draw_num += 2;
             splitDraw();
+        } else if (card instanceof WildDrawFourCard) {
+            draw_num += 4;
         }
         stateChange(card); // update the game state
     }
@@ -146,16 +161,11 @@ public class Game {
      * Being used skipCard, WildCard or WildDrawFourCard by previous player
      */
     public void missTurn() {
-        if (curPlayer.skipped()) {
-            resetFlag();
+        if (curPlayer.drawTwo() || curPlayer.drawFour()) {
+            drawAction(draw_num);
+            draw_num = 0;
         }
-        if (curPlayer.drawTwo()) {
-            drawAction(2);
-
-        }
-        if (curPlayer.drawFour()) {
-            drawAction(4);
-        }
+        resetFlag();
     }
 
     public void resetFlag() {
@@ -171,7 +181,6 @@ public class Game {
         for (int i = 0; i < num; i++) {
             curPlayer.drawOneCard();
         }
-        resetFlag();
     }
 
     /**
@@ -188,7 +197,7 @@ public class Game {
 
         if (currCard instanceof NumberCard) {
             if (prevCard instanceof NumberCard) { //if both number cards, either same color or same number
-                boolean sameNum = ((((NumberCard) currCard).cardNum() == ((NumberCard) prevCard).cardNum()));
+                boolean sameNum = (((NumberCard) currCard).cardNum() == ((NumberCard) prevCard).cardNum());
                 return (sameColor || sameNum);
             } else { //if not, same color
                 return sameColor;
@@ -211,48 +220,45 @@ public class Game {
      * @TODO: declaring color from the player
      */
     public void stateChange(Card card) {
-        int iter = getPlayerIter();
-        Player nextPlayer = players.get(iter);
-        player_iter++;
         if (card instanceof SkipCard) {
+            Player nextPlayer = players.get(getPlayerIter(1));
             nextPlayer.setSkipped(true);
         } else if (card instanceof ReverseCard) {
             reverse();
         } else if (card instanceof DrawTwoCard) {
+            Player nextPlayer = players.get(getPlayerIter(1));
             nextPlayer.setDrawTwo(true);
         } else if (card instanceof WildCard) {
             prevColor = declareColor();
-            if (reverseOnB) {
-                reverse();
-                player_iter -= 2;
-            }
+            reverseOnBlack();
         } else if (card instanceof WildDrawFourCard) {
             prevColor = declareColor();
-            if (reverseOnB) {
-                reverse();
-                player_iter -= 2;
-                nextPlayer = players.get(iter-2);
-            }
+            reverseOnBlack();
+            Player nextPlayer = players.get(getPlayerIter(1));
             nextPlayer.setDrawFour(true);
         }
     }
 
+
     /**
-     * Declaring the color by the player
+     * Declaring color by the player
      * Needed when playing WildCard or WildDrawFourCard
      * @return the color declared by the player
      */
     public Card.Colors declareColor() {
+        ArrayList<Card.Colors> colorsList = new ArrayList<>();
+        colorsList.add(Card.Colors.BLUE);
+        colorsList.add(Card.Colors.RED);
+        colorsList.add(Card.Colors.YELLOW);
+        colorsList.add(Card.Colors.GREEN);
+        colorsList.add(Card.Colors.WILD);
+        colorDeclared = colorsList.get(new Random().nextInt(colorsList.size()));
         return colorDeclared;
     }
 
 
     public void setPrevColor(Card.Colors color) {
         prevColor = color;
-    }
-
-    public void setPrevPlayer(Player p) {
-        prevPlayer = p;
     }
 
     /**
@@ -266,7 +272,6 @@ public class Game {
      * Reverse the order of the players' turn
      */
     public void reverse() {
-        // Reverse the players Arraylist so that the next player become the previous, vice versa
         if (direction == 0) {
             direction = 1;
         } else {
@@ -297,44 +302,59 @@ public class Game {
      * Game is over when a player has no cards in his hand
      * The player is the winner, game over
      */
-    public void gameOver() {
-        for (Player player:players) {
-            if (player.getHand().size() == 0) {
-                winner = player;
-                gameOver = true;
-                return;
-            }
+    public void checkGameOver(Player player) {
+        if (player.getHand().size() == 0) {
+            winner = player;
+            gameOver = true;
         }
     }
 
     /**
      * Get the iterator for player
+     * @param turn, 0 for previous, 1 for next player, else for current player
      * @return the iterator of the next player
      */
-    public int getPlayerIter() {
-        int iter = player_iter + 1;
-        if (direction == 0) { // normal, small to big index
-            if (iter == getPlayerNum()) {
-                iter = 0;
-            }
-        } else { // reversed
-            iter = player_iter - 1;
-            if (iter < 0) {
+    public int getPlayerIter(int turn) {
+        int iter = player_iter % getPlayerNum();
+        //getting previous in normal direction or next in reversed direction
+        if ((turn == 0 && direction == 0) || (turn == 1 && direction == 1) ) {
+            if (iter - 1 < 0) {
                 iter = getPlayerNum() - 1;
+            } else {
+                iter -= 1;
+            }
+        //getting next in normal direction or previous in reversed direction
+        } else if ((turn == 0 && direction == 1) || (turn == 1 && direction == 0)) {
+            if (iter + 1 == getPlayerNum()) {
+                iter = 0;
+            } else {
+                iter += 1;
             }
         }
         return iter;
     }
+
 
     /**
      * When a draw 2 card is played,
      * the person immediately following and preceding the player draws 1 card
      */
     public void splitDraw() {
-        prevPlayer.drawOneCard(); // the person preceding the player draws one card
-        int iter = getPlayerIter();
-        Player nextPlayer = players.get(iter); // the person following the player draws one card
+        Player prePlayer = players.get(getPlayerIter(0)); // player preceding
+        prePlayer.drawOneCard();
+        Player nextPlayer = players.get(getPlayerIter(1)); // player following
         nextPlayer.drawOneCard();
+    }
+
+    /**
+     * When a black card is played the player of the card can choose to change direction.
+     * This also determines who draws if a black draw is played.
+     * Variations: Mandatory and optional.
+     */
+    public void reverseOnBlack() {
+        if (reverseOnB) {
+            reverse();
+        }
     }
 
 
@@ -347,6 +367,10 @@ public class Game {
 
     public ArrayList<Player> getPlayers() {
         return players;
+    }
+
+    public Card.Colors getPrevColor() {
+        return prevColor;
     }
 
     public int getPlayerNum() {

@@ -4,26 +4,24 @@ import Cards.*;
 
 import java.util.ArrayList;
 
+/**
+ * The player class represents the current player
+ */
 public class Player {
     /**
      * Array list holding cards as player's hand
      */
-    public ArrayList<Card> hand;
-    /**
-     * Number of cards in a player's hand
-     */
-    public int cardsInHand;
+    private ArrayList<Card> hand;
     /**
      * The game
      */
-    public Game game;
-
+    private Game game;
     /**
      * Boolean variables to determine action need
      */
-    public boolean skip_;
-    public boolean drawTwo_;
-    public boolean drawFour_;
+    private boolean skip_;
+    private boolean drawTwo_;
+    private boolean drawFour_;
 
     /**
      * Constructor for a player
@@ -32,7 +30,6 @@ public class Player {
      */
     public Player(String name, Game game) {
         hand = new ArrayList<Card>();
-        cardsInHand = 0;
         this.game = game;
 
         skip_ = false;
@@ -44,14 +41,13 @@ public class Player {
      * Assigning 7 cards to each player at the beginning of the game
      */
     public void assignCards() {
-        Player player = this;
+        Player player;
         for (int i = 0; i < game.getPlayerNum(); i++) {
             //System.out.println(player);
             for (int j = 0; j < 7; j++) {
                 player = game.getPlayers().get(i);
                 Card card = game.getDeck().getTopCard();
-                player.getHand().add(card); // takes one card from top of deck
-                player.cardsInHand++;
+                player.getHand().add(card);
             }
         }
     }
@@ -68,7 +64,6 @@ public class Player {
         //Draw the top card from the deck
         Card todraw = game.getDeck().getTopCard();
         hand.add(todraw);
-        cardsInHand++;
         return todraw;
     }
 
@@ -78,38 +73,23 @@ public class Player {
      */
     public void playOneCard(Card card) {
         hand.remove(card);
-        cardsInHand--;
         game.discardPile_add(card);
         game.setPrevColor(card.getColor());
-        game.setPrevPlayer(this); // this player becomes the preceding
-    }
-
-    /**
-     * @return true if player has a valid card to play in hand, false otherwise.
-     */
-    public boolean canPlay() {
-        for (Card cardInHand:hand) {
-            if (game.isValid(cardInHand)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
      * Find the valid card in hand
-     * @return the card that is valid to play
+     * @return the card that is valid to play, null if no valid card
      */
     public Card findValidCard() {
-        Card card = null;
-        for (int i = 0; i < cardsInHand; i++) {
-            card = hand.get(i);
-            if (game.isValid(card)) {
-                return card;
+        for (Card cardInHand:hand) {
+            if (game.isValid(cardInHand)) {
+                return cardInHand;
             }
         }
-        return card;
+        return null;
     }
+
 
     public ArrayList<Card> getHand() {
         return hand;

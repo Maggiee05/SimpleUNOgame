@@ -5,15 +5,15 @@ import Cards.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * The deck class represents the draw pile
+ * Holding cards for players to draw from
+ */
 public class Deck {
     /**
      * The deck holding cards
      */
     public ArrayList<Card> deck;
-    /**
-     * The size of the draw pile
-     */
-    private int pileSize;
     /**
      * The game
      */
@@ -56,7 +56,7 @@ public class Deck {
             deck.add(new WildDrawFourCard());
         }
 
-        pileSize = deck.size();
+        shuffleDeck();
     }
 
     /**
@@ -72,7 +72,6 @@ public class Deck {
      */
     public Card getTopCard() {
         Card topCard = deck.get(0);
-        pileSize--;
         deck.remove(0);
         return topCard;
     }
@@ -93,7 +92,7 @@ public class Deck {
      * @return true if the draw pile is empty, false otherwise
      */
     public boolean isEmpty() {
-        return (pileSize == 0);
+        return (deck.size() == 0);
     }
 
     /**
@@ -101,7 +100,6 @@ public class Deck {
      */
     public void addToDeck(Card card) {
         deck.add(card);
-        pileSize++;
     }
 
     /**
