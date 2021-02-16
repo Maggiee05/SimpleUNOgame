@@ -21,13 +21,13 @@ I set up the testing environment using **IntelliJ IDEA** in **Mac OS**.
 ---
 ## Operation and Results
 ### Start Scene
-![StartOfGame](/Users/chenmaggie/Desktop/StartofGame.png)
+![StartOfGame](/Users/chenmaggie/Desktop/assignment1/img/StartofGame.png?raw=true)
 The user can input the number of players of the game in the text box. 
 After input a number and click the "START" button, the game starts.
 
 
 ### During the Game
-![Game(notHided)](/Users/chenmaggie/Desktop/Game(notHided).png)
+![Game(notHided)](/Users/chenmaggie/Desktop/assignment1/img/Game(notHided).png?raw=true)
 The current game state is shown in the window. 
 
 The color, number, symbol of the latest card from the discard pile is shown in the bottom left corner next to the text "Latest Card:".
@@ -36,19 +36,19 @@ Number of cards to stack and the current player in turn are also shown beside.
 There are also buttons to Skip, Draw Card, Hide and Change Color.
 
 #### If the "Hide" button is clicked
-![Game(hided)](/Users/chenmaggie/Desktop/Game(hided).png
+![Game(hided)](/Users/chenmaggie/Desktop/assignment1/img/Game(hided).png?raw=true)
 The cards of the player of the current turn are hided. 
 This is to prevent opponents see current player's cards.
 The "Hide" button now changes to "Show". And if "Show" is clicked again, the cards are revealed.
 And cards in the players and are revealed as the previous screenshot above.
 
 #### If the "Change Color" button is clicked
-![ChangeColor](/Users/chenmaggie/Desktop/ChangeColor.png)
+![ChangeColor](/Users/chenmaggie/Desktop/assignment1/img/ChangeColor.png?raw=true)
 Color options are shown. The player can choose which color to change.
 This button is valid to click only if a wild card is played.
 
 ### End Scene of the Game
-![ChangeColor](/Users/chenmaggie/Desktop/EndOfGame.png)
+![ChangeColor](/Users/chenmaggie/Desktop/assignment1/img/EndOfGame.png)
 The winner of the game is shown. If the player click the "Start a new game" button,
 a new game will start. And the Start scene windows pop up.
 
