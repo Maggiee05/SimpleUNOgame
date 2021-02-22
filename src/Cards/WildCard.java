@@ -7,4 +7,8 @@ public class WildCard extends Card {
     public WildCard () {
         super(Colors.WILD);
     }
+
+    public String getVal() {
+        return "Wild";
+    }
 }

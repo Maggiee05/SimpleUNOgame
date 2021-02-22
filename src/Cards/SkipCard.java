@@ -7,4 +7,8 @@ public class SkipCard extends Card{
     public SkipCard(Colors color) {
         super(color);
     }
+
+    public String getVal() {
+        return "Skip";
+    }
 }
