@@ -44,7 +44,7 @@ public class gameOnGoing {
         centerPanel.add(labels);
         panel.add(centerPanel, BorderLayout.CENTER);
 
-        //handling skip, draw, change color button
+        //handling skip, draw, change color button, and next for AI
         JButton skipButton = new JButton ("Skip");
         JButton drawButton = new JButton ("Draw Card");
         JButton colorButton = new JButton("Change Color"); //Only valid to click after a wild card is played
@@ -77,11 +77,17 @@ public class gameOnGoing {
             }
         }
 
-
+        //If the current player is skipped, human needs to click the skip button,
+        // AI automatically skipped when the next button is clicked
         if (curPlayer.skipped()) {
             if ((curPlayer instanceof basicAI) || (curPlayer instanceof strategicAI)) {
-                game.resetFlag();
-                updateGame(frame);
+                nextButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        game.resetFlag();
+                        updateGame(frame);
+                    }
+                });
             } else {
                 JLabel label = new JLabel("You are skipped. Please click skip button");
                 panel.add(label);
@@ -97,27 +103,24 @@ public class gameOnGoing {
         }
 
 
-        if (curPlayer.findValidCard() == null) { // no valid card to play
-            if ((curPlayer instanceof basicAI) || (curPlayer instanceof strategicAI)) {
+        if (curPlayer.findValidCard() == null) { // no valid card in hand to play
+            if ((curPlayer instanceof basicAI) || (curPlayer instanceof strategicAI)) { //AI
                 userDraw(curPlayer, nextButton, frame);
-            } else {
+            } else { //Human
                 userDraw(curPlayer, drawButton, frame);
             }
         } else {
-            if ((curPlayer instanceof basicAI) || (curPlayer instanceof strategicAI)) {
+            if ((curPlayer instanceof basicAI) || (curPlayer instanceof strategicAI)) { //AI
                 Card validC = curPlayer.findValidCard();
                 panel.add(nextButton);
-                nextButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        curPlayer.playOneCard(validC);
-                        if (game.checkGameOver(curPlayer)) {
-                            new endOfGame(game);
-                            frame.setVisible(false);
-                        } else {
-                            game.stateChange(validC);
-                            updateGame(frame);
-                        }
+                nextButton.addActionListener(e -> {
+                    curPlayer.playOneCard(validC);
+                    if (game.checkGameOver(curPlayer)) {
+                        new endOfGame(game);
+                        frame.setVisible(false);
+                    } else {
+                        game.stateChange(validC);
+                        updateGame(frame);
                     }
                 });
             } else { //human
@@ -201,60 +204,53 @@ public class gameOnGoing {
         panel.add(leftPanel, BorderLayout.WEST);
     }
 
+    /**
+     * Handling the draw Button
+     * The function is called only when there's no valid card in hand
+     */
     public void userDraw(Player player, JButton button, JFrame frame) {
-        //when no valid card in hand
         if ((player instanceof basicAI) || (player instanceof strategicAI)) {
             frame.add(button);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (game.getStack() == 0) {
-                        Card newCard = player.drawOneCard();
-                        if (game.isValid(newCard)) {
-                            player.playOneCard(newCard);
-                        }
-                    } else {
-                        game.drawAction(game.getStack());
+            button.addActionListener(e -> {
+                if (game.getStack() == 0) {
+                    Card newCard = player.drawOneCard();
+                    if (game.isValid(newCard)) {
+                        player.playOneCard(newCard);
                     }
-                    updateGame(frame);
-                    frame.setVisible(false);
-                    frame.dispose();
-
+                } else {
+                    game.drawAction(game.getStack());
                 }
+                updateGame(frame);
+                frame.setVisible(false);
+                frame.dispose();
+
             });
-            if (player.drawFour() || player.drawTwo()) {
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(frame,"No valid card in hand. " + game.getStack() + " cards will be drawn.");
-                        game.drawAction(game.getStack());
-                        System.out.println("Current player draw " + game.getStack() + " cards");
-                        updateGame(frame);
-                        frame.setVisible(false);
-                        frame.dispose();
-                    }
-                });
-            } else {
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        JOptionPane.showMessageDialog(frame,"No valid card in hand. One card is drawn");
-                        Card newCard = player.drawOneCard();
-                        if (game.isValid(newCard)) {
-                            player.playOneCard(newCard);
-                            System.out.println("The card drawn is valid and is played");
-                        }
-                        updateGame(frame);
-                        frame.setVisible(false);
-                        frame.dispose();
-                    }
-                });
-            }
+        } else if (player.drawFour() || player.drawTwo()) { //needs to draw more than 1 card, and miss a turn
+            button.addActionListener(e -> {
+                JOptionPane.showMessageDialog(frame,"No valid card in hand. " + game.getStack() + " cards will be drawn.");
+                game.drawAction(game.getStack());
+                System.out.println("Current player draw " + game.getStack() + " cards");
+                updateGame(frame);
+                frame.setVisible(false);
+                frame.dispose();
+            });
+        } else {
+            button.addActionListener(e -> { //draw 1 card, if valid, play it
+                JOptionPane.showMessageDialog(frame,"No valid card in hand. One card is drawn");
+                Card newCard = player.drawOneCard();
+                if (game.isValid(newCard)) {
+                    player.playOneCard(newCard);
+                    System.out.println("The card drawn is valid and is played");
+                }
+                updateGame(frame);
+                frame.setVisible(false);
+                frame.dispose();
+            });
         }
         game.resetFlag();
     }
 
-    public void updateGame(JFrame frame) {
+    public void updateGame(JFrame frame) { //For running output
         System.out.println("Direction is now: " + game.getDirection());
         System.out.println("Iterator is increased by 1");
         System.out.println("-----------------------");
@@ -266,7 +262,11 @@ public class gameOnGoing {
         frame.dispose();
     }
 
-
+    /**
+     * Handling the Card button
+     * When the valid card button is clicked, the card is played
+     * If Invalid card is clicked, no effects are taken
+     */
     public void clickAndPlay(Card c, Player p, JFrame frame) {
         int idx = p.getHand().indexOf(c);
         JButton bt = buttons.get(idx);
@@ -286,6 +286,9 @@ public class gameOnGoing {
         });
     }
 
+    /**
+     * Handling the changeColor Button
+     */
     public void selectColor(JButton button, JPanel panel, JFrame frame) {
         if ((game.getPrevCard() instanceof WildDrawFourCard) || (game.getPrevCard() instanceof WildCard)) {
             button.addActionListener(ae -> {

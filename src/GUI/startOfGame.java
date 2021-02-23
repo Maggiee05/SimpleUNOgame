@@ -57,7 +57,6 @@ public class startOfGame {
             };
 
             cb.addActionListener(cbActionListener);
-
             //cb.setSelectedIndex(0);
         }
 
@@ -83,7 +82,7 @@ public class startOfGame {
                     }
                 });
 
-                for (int i = 0; i < player_num; i++) {
+                for (int i = 0; i < player_num; i++) { //declare the player type
                     String player_type = types.get(i);
                     Player newPlayer;
                     if (player_type.equals("Human")) {
@@ -94,8 +93,9 @@ public class startOfGame {
                         newPlayer = new strategicAI("Player " + i + " (Strategic AI)", game);
                     }
                     players.add(newPlayer);
-                    System.out.println(newPlayer.getName());
+//                    System.out.println(newPlayer.getName());
                 }
+                System.out.println(types);
                 game.newGame(players);
                 new gameOnGoing(game);
                 frame.setVisible(false);

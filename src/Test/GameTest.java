@@ -132,9 +132,6 @@ class GameTest {
         //test wild draw four
 //        System.out.println(game.getDirection());
         System.out.println(players);
-//        System.out.println(game.getPlayerIter(0));
-//        System.out.println(game.getPlayerIter(1));
-//        System.out.println(game.getPlayerIter(2));
         //game.setCurPlayer(player1);
         game.stateChange(new WildDrawFourCard());
         System.out.println(player1.drawFour());
@@ -143,9 +140,6 @@ class GameTest {
         System.out.println(player4.drawFour());
         //assertTrue(player2.drawFour());
 
-        //test skip
-        game.stateChange(new SkipCard(Card.Colors.RED));
-//        assertTrue(player2.skipped());
         //test reverse
         System.out.println(players);
         int old_iter = game.getPlayerIter(1);
