@@ -40,4 +40,22 @@ class CardTest {
         }
     }
 
+    @Test
+    void testGetVal() {
+        Card card = deck.getTopCard();
+        String val = card.getVal();
+        for (int i = 0; i < 20; i++) {
+            if (card instanceof WildCard) {
+                assertEquals("Wild", val);
+            } else if (card instanceof DrawTwoCard) {
+;                assertEquals("+2", val);
+            } else if (card instanceof WildDrawFourCard) {
+                assertEquals("+4", val);
+            } else if (card instanceof ReverseCard) {
+                assertEquals("Reverse", val);
+            }
+        }
+
+    }
+
 }

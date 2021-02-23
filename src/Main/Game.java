@@ -4,7 +4,6 @@ import Cards.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * The game class represents the game
@@ -36,10 +35,6 @@ public class Game {
      */
     private int player_iter;
     /**
-     * The color declared by player when playing WILD CARDS
-     */
-    private Card.Colors colorDeclared;
-    /**
      * The color declared by previous player when playing Wild and WildDrawFour Card
      */
     private Card.Colors prevColor;
@@ -70,11 +65,10 @@ public class Game {
         curPlayer = null;
         direction = 0; //default normal direction, small to large index
         player_iter = 0;
-        colorDeclared = null;
         prevColor = null;
         gameOver = false;
         winner = null;
-        reverseOnB = true;// default reverse on black is mandatory, can be changed
+        reverseOnB = false;// default reverse on black is mandatory, can be changed
         draw_num = 0;
     }
 
@@ -111,40 +105,17 @@ public class Game {
     }
 
     /**
-     * Options for player to perform:
-     * If the player has the special action, apply it
-     * If the current player has valid card, play it
-     * If the current player has no valid car, draw a card from the deck,
-     *      if the card drew is valid, play it
-     *      if not, continue to the next player
+     * Increase the player iterator
      */
-    public void perform() {
-        player_iter++; // iterator turns to the next player
-        if (curPlayer.skipped()) {
-            missTurn();
-        } else if (curPlayer.findValidCard() != null) { // has a valid card
-            playCard();
-        } else { // has no valid card
-            if (curPlayer.drawTwo() || curPlayer.drawFour()) {
-                missTurn();
-                return;
-            }
-            Card card = curPlayer.drawOneCard();
-            if (isValid(card)) {
-                playCard(); // the card drew is valid, play it
-            } else {
-                return; // the card drew is not valid, continue
-            }
-
-        }
+    public void incIter() {
+        player_iter = getPlayerIter(1);
     }
 
     /**
-     * The current player plays the valid card
-     * And the game state need to be updated
+     * The current player plays the card
+     * Game state is updated
      */
-    public void playCard() {
-        Card card = curPlayer.findValidCard();
+    public void playCard(Card card) {
         curPlayer.playOneCard(card);
         checkGameOver(curPlayer);
         if (card instanceof DrawTwoCard) {
@@ -153,19 +124,7 @@ public class Game {
         } else if (card instanceof WildDrawFourCard) {
             draw_num += 4;
         }
-        stateChange(card); // update the game state
-    }
-
-    /**
-     * The current player misses a turn
-     * Being used skipCard, WildCard or WildDrawFourCard by previous player
-     */
-    public void missTurn() {
-        if (curPlayer.drawTwo() || curPlayer.drawFour()) {
-            drawAction(draw_num);
-            draw_num = 0;
-        }
-        resetFlag();
+        //stateChange(card); // update the game state
     }
 
     public void resetFlag() {
@@ -181,6 +140,7 @@ public class Game {
         for (int i = 0; i < num; i++) {
             curPlayer.drawOneCard();
         }
+        draw_num = 0;
     }
 
     /**
@@ -190,10 +150,19 @@ public class Game {
      * @return true if the card is valid to play, false otherwise
      */
     public boolean isValid(Card currCard) {
-        Card prevCard = discardPile.get(discardPile.size() - 1); // getting the previous card
+        Card prevCard = getPrevCard();// getting the previous card
+
+        if ((prevCard instanceof WildDrawFourCard) && (!(currCard instanceof WildDrawFourCard)) && (curPlayer.drawFour())) {
+            return false;
+        }
+
+        if ((prevCard instanceof DrawTwoCard) && (!(currCard instanceof DrawTwoCard)) && (curPlayer.drawTwo())) {
+            return false;
+        }
+
 
         Card.Colors currColor = currCard.getColor();
-        boolean sameColor = (currColor == prevCard.getColor()); // whether the color matches with the precious card
+        boolean sameColor = ((currColor == prevCard.getColor()) || (currColor == prevColor)); // whether the color matches with the previous card
 
         if (currCard instanceof NumberCard) {
             if (prevCard instanceof NumberCard) { //if both number cards, either same color or same number
@@ -203,7 +172,7 @@ public class Game {
                 return sameColor;
             }
 
-        //Action cards, valid if same color or same symbol
+            //Action cards, valid if same color or same symbol
         } else if (currCard instanceof SkipCard) {
             return (sameColor || (prevCard instanceof SkipCard));
         } else if (currCard instanceof ReverseCard) {
@@ -212,48 +181,31 @@ public class Game {
             return (sameColor || (prevCard instanceof DrawTwoCard));
         }
 
-        return true; //wild cards always true
+        return true;
     }
 
     /**
      * Changing the state of the player
-     * @TODO: declaring color from the player
      */
     public void stateChange(Card card) {
+        System.out.println("State changed");
+        prevColor = card.getColor();
         if (card instanceof SkipCard) {
             Player nextPlayer = players.get(getPlayerIter(1));
             nextPlayer.setSkipped(true);
+            System.out.println(nextPlayer.getName() + " is skipped");
         } else if (card instanceof ReverseCard) {
             reverse();
         } else if (card instanceof DrawTwoCard) {
             Player nextPlayer = players.get(getPlayerIter(1));
             nextPlayer.setDrawTwo(true);
         } else if (card instanceof WildCard) {
-            prevColor = declareColor();
             reverseOnBlack();
         } else if (card instanceof WildDrawFourCard) {
-            prevColor = declareColor();
             reverseOnBlack();
             Player nextPlayer = players.get(getPlayerIter(1));
             nextPlayer.setDrawFour(true);
         }
-    }
-
-
-    /**
-     * Declaring color by the player
-     * Needed when playing WildCard or WildDrawFourCard
-     * @return the color declared by the player
-     */
-    public Card.Colors declareColor() {
-        ArrayList<Card.Colors> colorsList = new ArrayList<>();
-        colorsList.add(Card.Colors.BLUE);
-        colorsList.add(Card.Colors.RED);
-        colorsList.add(Card.Colors.YELLOW);
-        colorsList.add(Card.Colors.GREEN);
-        colorsList.add(Card.Colors.WILD);
-        colorDeclared = colorsList.get(new Random().nextInt(colorsList.size()));
-        return colorDeclared;
     }
 
 
@@ -272,6 +224,7 @@ public class Game {
      * Reverse the order of the players' turn
      */
     public void reverse() {
+        System.out.println("Direction is changed");
         if (direction == 0) {
             direction = 1;
         } else {
@@ -302,11 +255,12 @@ public class Game {
      * Game is over when a player has no cards in his hand
      * The player is the winner, game over
      */
-    public void checkGameOver(Player player) {
+    public boolean checkGameOver(Player player) {
         if (player.getHand().size() == 0) {
             winner = player;
             gameOver = true;
         }
+        return gameOver;
     }
 
     /**
@@ -381,12 +335,33 @@ public class Game {
         return winner;
     }
 
+    public Player getCurPlayer() {
+        return curPlayer;
+    }
+    public int getDirection() {
+        return direction;
+    }
+
+    public Card getPrevCard() {
+        return discardPile.get(discardPile.size() - 1);
+    }
+
+    public int getStack() {
+        return draw_num;
+    }
+
     /**
      * For testing purpose
      */
     public void setCurPlayer(Player p) {
         this.curPlayer = p;
     }
+
+    public void setReverseOnB(boolean f) {
+        reverseOnB = f;
+    }
+
+
 
 }
 

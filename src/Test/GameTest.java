@@ -64,27 +64,6 @@ class GameTest {
 
 
     /**
-     * Test if the flag for missing a turn takes effect
-     */
-    @Test
-    public void testMissTurn() {
-        int oldSize = player1.getHand().size();
-        game.setCurPlayer(player1);
-        // using skip card
-        player1.setSkipped(true);
-        game.missTurn();
-        assertEquals(oldSize, player1.getHand().size());
-        // using DrawTwo card
-        game.setCurPlayer(player1);
-        Card c1 = new NumberCard(Card.Colors.RED, 4);
-        Card c2 = new DrawTwoCard(Card.Colors.RED);
-        player1.getHand().add(c1);
-        player2.getHand().add(c2);
-        player1.playOneCard(c1);
-        game.playCard();
-    }
-
-    /**
      * Test if player correctly draw the number of cards
      */
     @Test
@@ -150,6 +129,23 @@ class GameTest {
 
     @Test
     public void testStateChange() {
+        //test wild draw four
+//        System.out.println(game.getDirection());
+        System.out.println(players);
+//        System.out.println(game.getPlayerIter(0));
+//        System.out.println(game.getPlayerIter(1));
+//        System.out.println(game.getPlayerIter(2));
+        //game.setCurPlayer(player1);
+        game.stateChange(new WildDrawFourCard());
+        System.out.println(player1.drawFour());
+        System.out.println(player2.drawFour());
+        System.out.println(player3.drawFour());
+        System.out.println(player4.drawFour());
+        //assertTrue(player2.drawFour());
+
+        //test skip
+        game.stateChange(new SkipCard(Card.Colors.RED));
+//        assertTrue(player2.skipped());
         //test reverse
         System.out.println(players);
         int old_iter = game.getPlayerIter(1);
