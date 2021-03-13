@@ -15,7 +15,11 @@ public class Player {
     /**
      * The game
      */
-    private Game game;
+    protected Game game;
+    /**
+     * Player's name
+     */
+    private String name;
     /**
      * Boolean variables to determine action need
      */
@@ -31,6 +35,7 @@ public class Player {
     public Player(String name, Game game) {
         hand = new ArrayList<Card>();
         this.game = game;
+        this.name = name;
 
         skip_ = false;
         drawTwo_ = false;
@@ -93,6 +98,10 @@ public class Player {
 
     public ArrayList<Card> getHand() {
         return hand;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /*-----------------------------------------------------------------*/
