@@ -1,9 +1,6 @@
 ## UNO
 An UNO game application is a card game that multiple players to involve.
 
-## MOTIVATION
-CS242 Assignment 1
-
 ## TECH USED
 - Java
 - GUI
